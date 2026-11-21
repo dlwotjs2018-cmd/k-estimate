@@ -224,6 +224,18 @@
     .btn-jpg:hover {
       background: #115e59;
     }
+    .btn-sms {
+      background: #0369a1;
+    }
+    .btn-sms:hover {
+      background: #075985;
+    }
+    .btn-copy {
+      background: #475569;
+    }
+    .btn-copy:hover {
+      background: #334155;
+    }
     .btn-sub {
       background: #475569;
       font-size: 13px;
@@ -306,6 +318,46 @@
       font-size: 14px;
       font-weight: 600;
       border-color: #94a3b8;
+    }
+    .sms-box {
+      max-width: 980px;
+      margin: 22px auto 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 18px 22px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .sms-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .sms-box-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a365d;
+    }
+    .sms-help {
+      font-size: 12.5px;
+      color: #64748b;
+    }
+    .sms-preview-textarea {
+      min-height: 132px;
+      resize: vertical;
+      line-height: 1.55;
+      background: #f8fafc;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+    .sms-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
     }
 
     /* 단가표 관리 모달 */
@@ -430,19 +482,19 @@
         <div class="party-title">공급받는 자 (고객 정보)</div>
         <div class="party-row">
           <span class="party-label">업체/성함</span>
-          <input type="text" id="client-name" placeholder="업체명 또는 고객 성함">
+          <input type="text" id="client-name" placeholder="업체명 또는 고객 성함" oninput="refreshSmsPreview()">
         </div>
         <div class="party-row">
           <span class="party-label">연락처</span>
-          <input type="text" id="client-phone" placeholder="010-0000-0000">
+          <input type="text" id="client-phone" placeholder="010-0000-0000" oninput="refreshSmsPreview()">
         </div>
         <div class="party-row">
           <span class="party-label">현장/주소</span>
-          <input type="text" id="client-address" placeholder="시공 현장 또는 주소">
+          <input type="text" id="client-address" placeholder="시공 현장 또는 주소" oninput="refreshSmsPreview()">
         </div>
         <div class="party-row">
           <span class="party-label">작성일자</span>
-          <input type="date" id="estimate-date">
+          <input type="date" id="estimate-date" onchange="refreshSmsPreview()">
         </div>
       </div>
 
@@ -450,7 +502,7 @@
         <div class="party-title">공급자 정보 (자동 저장)</div>
         <div class="party-row">
           <span class="party-label">상호/업체명</span>
-          <input type="text" id="supplier-name" placeholder="K-난방관리" oninput="saveSupplierInfo()">
+          <input type="text" id="supplier-name" placeholder="K-난방관리" oninput="saveSupplierInfo(); refreshSmsPreview()">
         </div>
         <div class="party-row">
           <span class="party-label">사업자번호</span>
@@ -460,7 +512,7 @@
           <span class="party-label">대표자 / 연락처</span>
           <div style="display: flex; gap: 6px; width: 100%;">
             <input type="text" id="supplier-ceo" placeholder="대표자명" oninput="saveSupplierInfo()">
-            <input type="text" id="supplier-phone" placeholder="연락처" oninput="saveSupplierInfo()">
+            <input type="text" id="supplier-phone" placeholder="연락처" oninput="saveSupplierInfo(); refreshSmsPreview()">
           </div>
         </div>
         <div class="party-row">
@@ -501,17 +553,36 @@
         id="estimate-memo"
         class="memo-input"
         placeholder="시공 특이사항, 현장 조건, 결제 안내, 보증/A/S 내용 등 추가 코멘트를 입력하세요."
+        oninput="refreshSmsPreview()"
       ></textarea>
     </div>
   </div>
 
-  <div class="btn-container">
+  <div class="btn-container no-export">
     <button type="button" class="btn-jpg" onclick="downloadJPG()">JPG 견적서 다운로드</button>
     <select id="pdf-size-mode" class="pdf-mode-select" aria-label="PDF 용지 비율 선택">
       <option value="full">PDF: 전체화면 비율</option>
       <option value="a4">PDF: A4 세로 규격</option>
     </select>
     <button type="button" onclick="downloadPDF()">PDF 견적서 다운로드</button>
+    <button type="button" class="btn-sms" onclick="sendSmsEstimate()">문자 보내기</button>
+  </div>
+
+  <div class="sms-box no-export">
+    <div class="sms-box-header">
+      <div class="sms-box-title">문자 발송 요약 문구</div>
+      <div class="sms-help">JPG/PDF 파일은 먼저 다운로드한 뒤 문자 앱에서 첨부해 주세요.</div>
+    </div>
+    <textarea
+      id="sms-message-preview"
+      class="sms-preview-textarea"
+      placeholder="견적 내용을 입력하면 문자 안내 문구가 자동으로 생성됩니다."
+    ></textarea>
+    <div class="sms-actions">
+      <button type="button" class="btn-sms" onclick="sendSmsEstimate()">문자 앱으로 보내기</button>
+      <button type="button" class="btn-copy" onclick="copySmsMessage()">문구 복사하기</button>
+      <button type="button" class="btn-outline" onclick="refreshSmsPreview(true)">견적서 내용으로 문구 재생성</button>
+    </div>
   </div>
 
   <!-- 단가표 추가 / 수정 / 삭제 모달 -->
@@ -598,6 +669,7 @@
     const ESTIMATES_STORAGE_KEY = 'k_heating_saved_estimates_v1';
 
     let priceTable = loadPriceTable();
+    let isSmsPreviewCustomized = false;
 
     function cloneData(obj) {
       return JSON.parse(JSON.stringify(obj));
@@ -709,6 +781,123 @@
       return rows;
     }
 
+    function buildSmsSummaryText() {
+      const supplierName = document.getElementById('supplier-name').value.trim() || 'K-난방관리';
+      const supplierPhone = document.getElementById('supplier-phone').value.trim();
+      const clientName = document.getElementById('client-name').value.trim();
+      const clientAddress = document.getElementById('client-address').value.trim();
+      const dateStr = document.getElementById('estimate-date').value || new Date().toISOString().slice(0, 10);
+      const supplyTotal = document.getElementById('supply-total').innerText;
+      const vatTotal = document.getElementById('vat-total').innerText;
+      const grandTotal = document.getElementById('grand-total').innerText;
+      const memo = document.getElementById('estimate-memo').value.trim();
+
+      const itemLines = [];
+      document.querySelectorAll('#item-rows tr').forEach(row => {
+        const category = row.querySelector('.category-select')?.value.trim() || '';
+        const specSelect = row.querySelector('.spec-select');
+        const selectedOpt = specSelect?.options?.[specSelect.selectedIndex];
+        const specName = selectedOpt?.dataset?.specName || '';
+        const customSpec = row.querySelector('.custom-spec-input')?.value.trim() || '';
+        const qty = Math.max(0, parseNum(row.querySelector('.qty-input')?.value));
+        const rowTotal = parseNum(row.querySelector('.row-total')?.value);
+
+        let specLabel = '';
+        if (specSelect?.value === '__MANUAL__') {
+          specLabel = customSpec || '직접입력';
+        } else if (specName && !specName.includes('직접입력')) {
+          specLabel = specName;
+        } else if (specName.includes('직접입력')) {
+          specLabel = customSpec ? `${specName} (${customSpec})` : specName;
+        }
+
+        if (category || specLabel || rowTotal > 0) {
+          const title = [category, specLabel].filter(Boolean).join(' ');
+          itemLines.push(`- ${title || '항목'} x${qty} : ${rowTotal.toLocaleString()}원`);
+        }
+      });
+
+      const lines = [
+        `[${supplierName}] 견적 안내`,
+        clientName ? `수신: ${clientName} 고객님` : '수신: 고객님',
+        `작성일: ${dateStr}`
+      ];
+
+      if (clientAddress) {
+        lines.push(`현장/주소: ${clientAddress}`);
+      }
+
+      if (itemLines.length > 0) {
+        lines.push('', '[내역]', ...itemLines);
+      }
+
+      lines.push(
+        '',
+        `공급가액: ${supplyTotal}원`,
+        `부가세(10%): ${vatTotal}원`,
+        `합계금액(VAT포함): ${grandTotal}원`
+      );
+
+      if (memo) {
+        lines.push('', `[비고]`, memo);
+      }
+
+      if (supplierPhone) {
+        lines.push('', `문의: ${supplierName} (${supplierPhone})`);
+      }
+
+      return lines.join('\n');
+    }
+
+    function refreshSmsPreview(force = false) {
+      const textarea = document.getElementById('sms-message-preview');
+      if (!textarea) return;
+      if (force) {
+        isSmsPreviewCustomized = false;
+      }
+      if (!isSmsPreviewCustomized) {
+        textarea.value = buildSmsSummaryText();
+      }
+    }
+
+    function getCleanPhoneNumber() {
+      const rawPhone = document.getElementById('client-phone').value || '';
+      return rawPhone.replace(/[^0-9+]/g, '');
+    }
+
+    function sendSmsEstimate() {
+      const textarea = document.getElementById('sms-message-preview');
+      if (!textarea.value.trim()) {
+        textarea.value = buildSmsSummaryText();
+      }
+
+      const phone = getCleanPhoneNumber();
+      const body = encodeURIComponent(textarea.value);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const sep = isIOS ? '&' : '?';
+      const smsUrl = phone ? `sms:${phone}${sep}body=${body}` : `sms:${sep}body=${body}`;
+
+      window.location.href = smsUrl;
+    }
+
+    async function copySmsMessage() {
+      const textarea = document.getElementById('sms-message-preview');
+      const text = textarea.value.trim() || buildSmsSummaryText();
+      if (!textarea.value.trim()) {
+        textarea.value = text;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('문자 요약 문구가 복사되었습니다.');
+      } catch (err) {
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        alert('문자 요약 문구가 복사되었습니다.');
+      }
+    }
+
     function saveEstimateToStorage() {
       const clientName = document.getElementById('client-name').value.trim();
       const date = document.getElementById('estimate-date').value || new Date().toISOString().slice(0, 10);
@@ -793,6 +982,7 @@
         qtyInput.value = String(data.qty || 1);
       });
 
+      isSmsPreviewCustomized = false;
       calculateTotal();
     }
 
@@ -821,6 +1011,7 @@
       const tbody = document.getElementById('item-rows');
       tbody.innerHTML = '';
       tbody.appendChild(createRowElement());
+      isSmsPreviewCustomized = false;
       calculateTotal();
     }
 
@@ -952,7 +1143,7 @@
           <select class="spec-select" onchange="updatePrice(this)">
             <option value="">-- 항목을 먼저 선택하세요 --</option>
           </select>
-          <input type="text" class="custom-spec-input" placeholder="직접 입력할 규격/상세명" style="display: none;">
+          <input type="text" class="custom-spec-input" placeholder="직접 입력할 규격/상세명" style="display: none;" oninput="refreshSmsPreview()">
         </td>
         <td>
           <input type="text" class="price-input num-input readonly-box" readonly value="0" oninput="onManualPriceInput(this)">
@@ -973,6 +1164,7 @@
     function addRow() {
       const tbody = document.getElementById('item-rows');
       tbody.appendChild(createRowElement());
+      refreshSmsPreview();
     }
 
     function removeRow(btn) {
@@ -1001,6 +1193,7 @@
       document.getElementById('supply-total').innerText = supplyTotal.toLocaleString();
       document.getElementById('vat-total').innerText = vatTotal.toLocaleString();
       document.getElementById('grand-total').innerText = grandTotal.toLocaleString();
+      refreshSmsPreview();
     }
 
     function openPriceModal() {
@@ -1212,7 +1405,6 @@
     function prepareExportView(container) {
       const tempNodes = [];
 
-      // 메모가 비어 있으면 출력물에서 메모 영역 숨김
       const memoSection = container.querySelector('#memo-section');
       const memoInput = container.querySelector('#estimate-memo');
       if (memoSection && memoInput && !memoInput.value.trim()) {
@@ -1383,6 +1575,10 @@
         pdf.save(`${getEstimateBaseFileName()}_전체화면.pdf`);
       }
     }
+
+    document.getElementById('sms-message-preview').addEventListener('input', () => {
+      isSmsPreviewCustomized = true;
+    });
 
     // 초기 세팅
     loadSupplierInfo();
